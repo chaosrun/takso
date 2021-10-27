@@ -44,6 +44,8 @@ jobs:
         node-version: '14'
     - name: Install Chrome
       uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: stable
     - run: chrome --version
     - name: Install Chrome driver
       uses: nanasess/setup-chromedriver@master
@@ -53,7 +55,7 @@ jobs:
         export DISPLAY=:99
         chromedriver --url-base=/wd/hub &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-    - run: curl localhost:9515
+    - run: wget localhost:9515 test && cat test
     - name: Install dependencies
       run: mix deps.get
     - name: Creat database
