@@ -49,6 +49,8 @@ jobs:
     - run: chrome --version
     - name: Install Chrome driver
       uses: nanasess/setup-chromedriver@master
+      with:
+        chromedriver-version: '95.0.4638.17'
     - run: |
         export DISPLAY=:99
         chromedriver --url-base=/wd/hub &
