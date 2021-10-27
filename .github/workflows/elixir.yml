@@ -44,6 +44,8 @@ jobs:
         node-version: '14'
     - name: Install Chrome
       uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: stable
     - run: chrome --version
     - name: Install Chrome driver
       uses: nanasess/setup-chromedriver@master
