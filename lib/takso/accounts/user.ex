@@ -3,9 +3,10 @@ defmodule Takso.Accounts.User do
   import Ecto.Changeset
 
   schema "users" do
-    field :name, :string
+    field :name,     :string
     field :username, :string
     field :password, :string
+    field :age,      :integer
     has_many :bookings, Takso.Sales.Booking
     has_one :taxi, Takso.Sales.Taxi
 
@@ -15,7 +16,10 @@ defmodule Takso.Accounts.User do
   @doc false
   def changeset(user, params \\ %{}) do
     user
-    |> cast(params, [:name, :username, :password])
-    |> validate_required([:name, :username, :password])
+    |> cast(params, [:name, :username, :password, :age])
+    |> validate_required([:name, :username, :password, :age])
+    |> unique_constraint(:username)
+    |> validate_format(:email, ~r/@/)
+    |> validate_number(:age, greater_than_or_equal_to: 18)
   end
 end

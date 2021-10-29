@@ -16,6 +16,6 @@ defmodule Takso.Sales.Taxi do
   @doc false
   def changeset(taxi, attrs) do
     taxi
-    |> cast(attrs, [:username, :location, :status])
+    |> cast(attrs, [:username, :location, :status, :capacity, :price])
   end
 end
