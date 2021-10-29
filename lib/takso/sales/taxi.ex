@@ -6,6 +6,7 @@ defmodule Takso.Sales.Taxi do
     field :location, :string
     field :status, :string
     field :username, :string
+    belongs_to :user, Takso.Accounts.User
 
     timestamps()
   end

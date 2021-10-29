@@ -18,7 +18,7 @@ alias Takso.{Repo, Accounts.User, Sales.Taxi}
 |> Enum.map(fn user_data -> User.changeset(%User{}, user_data) end)
 |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
 
-[%{location: "Narva 25", status: "busy", username: "driver_1"},
- %{location: "Liivi 2", status: "busy", username: "driver_2"}]
+[%{username: "driver_1", location: "Narva 25", status: "busy", user_id: 1},
+ %{username: "driver_2", location: "Liivi 2", status: "busy", user_id: 2}]
 |> Enum.map(fn taxi_data -> Taxi.changeset(%Taxi{}, taxi_data) end)
 |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
