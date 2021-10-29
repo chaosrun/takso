@@ -18,7 +18,7 @@ defmodule WhiteBreadContext do
 
   scenario_finalize fn _status, _state ->
     Ecto.Adapters.SQL.Sandbox.checkin(Takso.Repo)
-    Hound.end_session
+    # Hound.end_session
   end
 
   given_ ~r/^the following taxis are on duty$/, fn state, %{table_data: table} ->
@@ -50,6 +50,7 @@ defmodule WhiteBreadContext do
   end
 
   then_ ~r/^I should receive a welcome message$/, fn state ->
+    assert visible_in_page? ~r/Welcome test@example.com/
     {:ok, state}
   end
 
