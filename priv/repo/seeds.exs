@@ -13,7 +13,8 @@
 alias Takso.{Repo, Accounts.User, Sales.Taxi}
 
 [%{name: "Fred Flintstone", username: "fred", password: "parool"},
- %{name: "Barney Rubble", username: "barney", password: "parool"}]
+ %{name: "Barney Rubble", username: "barney", password: "parool"},
+ %{name: "Tester", username: "test@example.com", password: "12345678"}]
 |> Enum.map(fn user_data -> User.changeset(%User{}, user_data) end)
 |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
 

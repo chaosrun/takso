@@ -10,8 +10,8 @@ env:
   MIX_ENV: test
 
 jobs:
-  test:
-    name: Test
+  bdd:
+    name: BDD
     runs-on: ubuntu-latest
     services:
       db:
@@ -58,8 +58,45 @@ jobs:
     - name: Install dependencies
       run: mix deps.get
     - name: Creat database
-      run: mix ecto.create && mix ecto.migrate
-    - name: BDD
+      run: mix ecto.create
+    - name: Run BDD tests
       run: mix white_bread.run
-    - name: Run tests
+  
+  tdd:
+    name: TDD
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:latest
+        ports: ['5432:5432']
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Elixir
+      uses: erlef/setup-elixir@885971a72ed1f9240973bd92ab57af8c1aa68f24
+      with:
+        elixir-version: '1.12' # Define the elixir version [required]
+        otp-version: '22.3' # Define the OTP version [required]
+    - name: Restore dependencies cache
+      uses: actions/cache@v2
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Install dependencies
+      run: mix deps.get
+    - name: Creat database
+      run: mix ecto.create
+    - name: Run TDD tests
       run: mix test
