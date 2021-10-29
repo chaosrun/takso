@@ -8,6 +8,11 @@ Feature: Taxi booking
           | username | location	     | status    |
           | peeter88 | Juhan Liivi 2 | busy      |
           | juhan85  | Kalevi 4      | available |
+    And I want to login with username "test@example.com" and password "12345678"
+    And I open the login page
+    And I enter the login information
+    When I submit the login information
+    Then I should receive a welcome message
     And I want to go from "Juhan Liivi 2" to "Muuseumi tee 2"
     And I open STRS' web page
     And I enter the booking information
@@ -20,6 +25,11 @@ Feature: Taxi booking
           | juhan85   | Kaubamaja | busy   |
           | peeter88  | Kaubamaja | busy   |
       And I want to go from "Liivi 2" to "Lõunakeskus"
+    And I want to login with username "test@example.com" and password "12345678"
+    And I open the login page
+    And I enter the login information
+    When I submit the login information
+    Then I should receive a welcome message
     And I open STRS' web page
     And I enter the booking information
     When I summit the booking request
