@@ -57,9 +57,10 @@ jobs:
         export DISPLAY=:99
         chromedriver &
         sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+        mix archive.install hex phx_new --force
         mix deps.get
         mix ecto.create
-        mix ecto.migrate
+        mix ecto.reset
         mix white_bread.run
   
   tdd:
@@ -96,7 +97,8 @@ jobs:
         node-version: '14'
     - name: Run TDD tests
       run: |
+        mix archive.install hex phx_new --force
         mix deps.get
         mix ecto.create
-        mix ecto.migrate
+        mix ecto.reset
         mix test
