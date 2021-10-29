@@ -50,7 +50,7 @@ jobs:
     - name: Install Chrome driver
       uses: nanasess/setup-chromedriver@master
       with:
-        chromedriver-version: '95.0.4638.17'
+        chromedriver-version: '95.0.4638.54'
     - run: |
         export DISPLAY=:99
         chromedriver &
