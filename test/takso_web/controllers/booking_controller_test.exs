@@ -1,7 +1,7 @@
 defmodule TaksoWeb.BookingControllerTest do
   use TaksoWeb.ConnCase
 
-  alias Takso.{Sales.Taxi, Repo}
+  alias Takso.{Sales.Taxi, Repo, Accounts.User}
 
   test "Login user", %{conn: conn} do
     conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
@@ -59,4 +59,25 @@ defmodule TaksoWeb.BookingControllerTest do
     assert html_response(conn, 200) =~ ~r/At present, there is no taxi available!/
   end
 
+  test "Booking selecte lowest price driver", %{conn: conn} do
+    conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
+    conn = get conn, redirected_to(conn)
+    assert html_response(conn, 200) =~ ~r/Welcome Tester/
+
+    driver_1 = %User{name: "D1 Driver", username: "d1@example.com", password: "parool", age: 20}
+    driver_2 = %User{name: "D2 Driver", username: "d2@example.com", password: "parool", age: 20}
+
+    d1 = Repo.insert!(driver_1)
+    d2 = Repo.insert!(driver_2)
+
+    taxi_1 = %Taxi{username: "d1@example.com", location: "Narva 25", status: "avaliable", user_id: d1.id, capacity: 4, price: 1.8}
+    taxi_2 = %Taxi{username: "d2@example.com", location: "Liivi 2", status: "avaliable", user_id: d2.id, capacity: 3, price: 1.2}
+
+    Repo.insert!(taxi_1)
+    Repo.insert!(taxi_2)
+
+    conn = post conn, "/bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
+    conn = get conn, redirected_to(conn)
+    assert html_response(conn, 200) =~ ~r/D2 Driver/
+  end
 end
