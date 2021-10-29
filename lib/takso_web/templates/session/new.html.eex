@@ -1,6 +1,6 @@
 <%= form_for @conn, Routes.session_path(@conn, :create), [as: :session], fn session -> %>
   <div class="form-group">
-    <%= label session, :username, class: "control-label" %>
+    <label class="control-label" for="session_username">Email</label>
     <%= text_input session, :username, class: "form-control" %>
   </div>
 

@@ -50,7 +50,7 @@ defmodule WhiteBreadContext do
   end
 
   then_ ~r/^I should receive a welcome message$/, fn state ->
-    assert visible_in_page? ~r/Welcome test@example.com/
+    assert visible_in_page? ~r/Welcome Tester/
     {:ok, state}
   end
 
