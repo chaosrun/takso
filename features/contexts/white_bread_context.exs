@@ -17,9 +17,8 @@ defmodule WhiteBreadContext do
   end
 
   scenario_finalize fn _status, _state ->
-    # Ecto.Adapters.SQL.Sandbox.checkin(Takso.Repo)
-    # Hound.end_session
-    nil
+    Ecto.Adapters.SQL.Sandbox.checkin(Takso.Repo)
+    Hound.end_session
   end
 
   given_ ~r/^the following taxis are on duty$/, fn state, %{table_data: table} ->
