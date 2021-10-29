@@ -16,7 +16,7 @@ defmodule TaksoWeb.BookingControllerTest do
 
     driver_0 = %User{name: "D0 Driver", username: "d0@example.com", password: "parool", age: 20}
     d0 = Repo.insert!(driver_0)
-    taxi_0 = %Taxi{username: "d0@example.com", location: "Narva 25", status: "available", user_id: d0.id, capacity: 4, price: 1.8}
+    taxi_0 = %Taxi{username: "d0@example.com", location: "Narva 25", status: "AVAILABLE", user_id: d0.id, capacity: 4, price: 1.8}
     Repo.insert!(taxi_0)
 
     conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
@@ -58,7 +58,7 @@ defmodule TaksoWeb.BookingControllerTest do
     conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Welcome Tester/
-    # Repo.insert!(%Taxi{status: "busy"})
+    Repo.insert!(%Taxi{status: "busy"})
     conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/At present, there is no taxi available!/
@@ -75,13 +75,13 @@ defmodule TaksoWeb.BookingControllerTest do
     d1 = Repo.insert!(driver_1)
     d2 = Repo.insert!(driver_2)
 
-    taxi_1 = %Taxi{username: "d1@example.com", location: "Narva 25", status: "available", user_id: d1.id, capacity: 4, price: 1.8}
-    taxi_2 = %Taxi{username: "d2@example.com", location: "Liivi 2", status: "available", user_id: d2.id, capacity: 3, price: 1.2}
+    taxi_1 = %Taxi{username: "d1@example.com", location: "Narva 25", status: "AVAILABLE", user_id: d1.id, capacity: 4, price: 1.8}
+    taxi_2 = %Taxi{username: "d2@example.com", location: "Liivi 2", status: "AVAILABLE", user_id: d2.id, capacity: 3, price: 1.2}
 
     Repo.insert!(taxi_1)
     Repo.insert!(taxi_2)
 
-    conn = post conn, "/bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
+    conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/D2 Driver/
   end
