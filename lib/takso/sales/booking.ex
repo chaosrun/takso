@@ -8,6 +8,7 @@ defmodule Takso.Sales.Booking do
     field :status,          :string, default: "OPEN"
     field :distance,        :float
     belongs_to :user, Takso.Accounts.User
+    belongs_to :taxi, Takso.Sales.Taxi
 
     timestamps()
   end

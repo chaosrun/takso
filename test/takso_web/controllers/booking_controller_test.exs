@@ -33,7 +33,7 @@ defmodule TaksoWeb.BookingControllerTest do
     conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Welcome Tester/
-    Repo.insert!(%Taxi{status: "available"})
+    Repo.insert!(%Taxi{status: "busy"})
     conn = post conn, "bookings", %{pickup_address: "", dropoff_address: "Liivi 2"}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Address can not be empty!/
@@ -43,7 +43,7 @@ defmodule TaksoWeb.BookingControllerTest do
     conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Welcome Tester/
-    Repo.insert!(%Taxi{status: "available"})
+    Repo.insert!(%Taxi{status: "busy"})
     conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: ""}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Address can not be empty!/

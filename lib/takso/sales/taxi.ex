@@ -9,6 +9,7 @@ defmodule Takso.Sales.Taxi do
     field :capacity, :integer
     field :price,    :float
     belongs_to :user, Takso.Accounts.User
+    has_many :bookings, Takso.Sales.Booking
 
     timestamps()
   end

@@ -45,12 +45,18 @@ defmodule TaksoWeb.BookingController do
           query = from t in Taxi, where: t.status == "available", select: t
           available_taxis = Repo.all(query)
           case length(available_taxis) > 0 do
-            true -> taxi = List.first(available_taxis)
+            true ->
+                    IO.inspect available_taxis
+                    IO.inspect Repo.all(Taxi)
+                    taxi =  Enum.min_by(available_taxis, fn tt -> tt.price end)
                     Multi.new
                     |> Multi.insert(:allocation, Allocation.changeset(%Allocation{}, %{status: "ALLOCATED"}) |> Changeset.put_change(:booking_id, booking.id) |> Changeset.put_change(:taxi_id, taxi.id))
                     |> Multi.update(:taxi, Taxi.changeset(taxi, %{}) |> Changeset.put_change(:status, "BUSY"))
-                    |> Multi.update(:booking, Booking.changeset(booking, %{}) |> Changeset.put_change(:status, "allocated"))
+                    |> Multi.update(:booking, Booking.changeset(booking, %{}) |> Changeset.put_change(:status, "allocated") |> Changeset.put_change(:taxi_id, taxi.id))
                     |> Repo.transaction
+
+                    # Repo.all(Booking) |> Repo.preload(taxi: :taxi)
+                    # IO.inspect Repo.all(Booking)
 
                     conn
                     |> put_flash(:info, "Your taxi will arrive in 5 minutes")
@@ -73,7 +79,11 @@ defmodule TaksoWeb.BookingController do
   end
 
   def get_distance(_pickup_address, _dropoff_address) do
-    5
+    5.0
+  end
+
+  def get_cost(distance, taxi) do
+    distance * taxi.price
   end
 
 end
