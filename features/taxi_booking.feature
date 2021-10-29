@@ -5,9 +5,9 @@ Feature: Taxi booking
 
   Scenario: Booking via STRS' web page (with confirmation)
     Given the following taxis are on duty
-          | username             | location	     | status    |
-          | peeter88@example.com | Juhan Liivi 2 | busy      |
-          | juhan85@example.com  | Kalevi 4      | available |
+      | username             | location	     | status    | capacity | price |
+      | peeter88@example.com | Juhan Liivi 2 | BUSY      | 4        | 1.8   |
+      | juhan85@example.com  | Kalevi 4      | AVAILABLE | 3        | 1.2   |
     And I want to login with username "test@example.com" and password "12345678"
       And I open the login page
       And I enter the login information
@@ -21,9 +21,9 @@ Feature: Taxi booking
 
   Scenario: Booking via STRS' web page (with rejection)
     Given the following taxis are on duty
-        | username              | location  | status |
-        | juhan85@example.com   | Kaubamaja | busy   |
-        | peeter88@example.com  | Kaubamaja | busy   |
+      | username              | location  | status | capacity | price |
+      | juhan85@example.com   | Kaubamaja | BUSY   | 4        | 1.8   |
+      | peeter88@example.com  | Kaubamaja | BUSY   | 3        | 1.2   |
     And I want to login with username "test@example.com" and password "12345678"
       And I open the login page
       And I enter the login information

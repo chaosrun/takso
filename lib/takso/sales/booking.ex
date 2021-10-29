@@ -18,5 +18,6 @@ defmodule Takso.Sales.Booking do
     struct
     |> cast(params, [:pickup_address, :dropoff_address, :status])
     |> validate_required([:pickup_address, :dropoff_address])
+    |> validate_number(:price, greater_than: 0)
   end
 end
