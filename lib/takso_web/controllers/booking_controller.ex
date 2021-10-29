@@ -17,7 +17,8 @@ defmodule TaksoWeb.BookingController do
   end
 
   def index(conn, _params) do
-    bookings = Repo.all(from b in Booking, where: b.user_id == ^conn.assigns.current_user.id)
+    bookings = Repo.all(from b in Booking, where: b.user_id == ^conn.assigns.current_user.id) |> Repo.preload(taxi: :user)
+    IO.inspect bookings
     render conn, "index.html", bookings: bookings
   end
 
@@ -42,25 +43,21 @@ defmodule TaksoWeb.BookingController do
 
       case Repo.insert(changeset) do
         {:ok, booking} ->
-          query = from t in Taxi, where: t.status == "available", select: t
+          query = from t in Taxi, where: t.status == "AVAILABLE", select: t
           available_taxis = Repo.all(query)
           case length(available_taxis) > 0 do
             true ->
-                    IO.inspect available_taxis
-                    IO.inspect Repo.all(Taxi)
-                    taxi =  Enum.min_by(available_taxis, fn tt -> tt.price end)
+                    taxi =  Enum.min_by(available_taxis, fn tt -> distance * tt.price end)
                     Multi.new
                     |> Multi.insert(:allocation, Allocation.changeset(%Allocation{}, %{status: "ALLOCATED"}) |> Changeset.put_change(:booking_id, booking.id) |> Changeset.put_change(:taxi_id, taxi.id))
                     |> Multi.update(:taxi, Taxi.changeset(taxi, %{}) |> Changeset.put_change(:status, "BUSY"))
-                    |> Multi.update(:booking, Booking.changeset(booking, %{}) |> Changeset.put_change(:status, "allocated") |> Changeset.put_change(:taxi_id, taxi.id))
+                    |> Multi.update(:booking, Booking.changeset(booking, %{}) |> Changeset.put_change(:status, "ACCEPTED") |> Changeset.put_change(:taxi_id, taxi.id))
                     |> Repo.transaction
-
-                    # Repo.all(Booking) |> Repo.preload(taxi: :taxi)
-                    # IO.inspect Repo.all(Booking)
 
                     conn
                     |> put_flash(:info, "Your taxi will arrive in 5 minutes")
                     |> redirect(to: Routes.booking_path(conn, :index))
+
             _    -> Booking.changeset(booking) |> Changeset.put_change(:status, "REJECTED")
                     |> Repo.update
 

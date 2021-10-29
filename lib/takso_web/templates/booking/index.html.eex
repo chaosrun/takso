@@ -14,7 +14,9 @@
       <td><%= booking.pickup_address %></td>
       <td><%= booking.dropoff_address %></td>
       <td><%= booking.status %></td>
-      <%# <td><%= booking.taxi.user.name %></td> %>
+      <%= if booking.taxi do %>
+        <td><%= booking.taxi.user.name %></td>
+      <% end %>
     </tr>
 <% end %>
   </tbody>
