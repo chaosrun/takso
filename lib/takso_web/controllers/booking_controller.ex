@@ -36,6 +36,7 @@ defmodule TaksoWeb.BookingController do
 
     query = from t in Taxi, where: t.status == "available", select: t
     available_taxis = Repo.all(query)
+    IO.puts length(available_taxis)
 
     case length(available_taxis) > 0 do
       true -> taxi = List.first(available_taxis)
