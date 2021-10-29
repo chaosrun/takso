@@ -3,9 +3,11 @@ defmodule Takso.Sales.Taxi do
   import Ecto.Changeset
 
   schema "taxis" do
-    field :location, :string
-    field :status, :string
     field :username, :string
+    field :location, :string
+    field :status,   :string
+    field :capacity, :integer
+    field :price,    :float
     belongs_to :user, Takso.Accounts.User
 
     timestamps()
