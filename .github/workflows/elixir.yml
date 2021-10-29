@@ -58,7 +58,7 @@ jobs:
     - name: Install dependencies
       run: mix deps.get
     - name: Creat database
-      run: mix ecto.create
+      run: mix ecto.create && mix ecto.migrate
     - name: Run BDD tests
       run: mix white_bread.run
   
@@ -97,6 +97,6 @@ jobs:
     - name: Install dependencies
       run: mix deps.get
     - name: Creat database
-      run: mix ecto.create
+      run: mix ecto.create && mix ecto.migrate
     - name: Run TDD tests
       run: mix test
