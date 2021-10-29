@@ -28,5 +28,5 @@ config :logger, level: :warn
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
-config :hound, driver: "chrome_driver"
+config :hound, driver: "chrome_driver", browser: "chrome_headless"
 config :takso, sql_sandbox: true
