@@ -93,9 +93,8 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '14'
-    - name: Install dependencies
-      run: mix deps.get
-    - name: Creat database
-      run: mix ecto.create
     - name: Run TDD tests
-      run: mix test
+      run: |
+        mix deps.get
+        mix ecto.create
+        mix test
