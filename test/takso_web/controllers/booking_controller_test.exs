@@ -85,4 +85,19 @@ defmodule TaksoWeb.BookingControllerTest do
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/D2 Driver/
   end
+
+  test "Driver cannot book a taxi", %{conn: conn} do
+    driver = %User{name: "D1 Driver", username: "d1@example.com", password: "parool", age: 20}
+    d = Repo.insert!(driver)
+    taxi = %Taxi{username: "d1@example.com", location: "Narva 25", status: "AVAILABLE", user_id: d.id, capacity: 4, price: 1.8}
+    Repo.insert!(taxi)
+
+    conn = post conn, "sessions", %{session: [username: "d1@example.com", password: "parool"]}
+    conn = get conn, redirected_to(conn)
+    assert html_response(conn, 200) =~ ~r/Welcome D1 Driver/
+
+    conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
+    conn = get conn, redirected_to(conn)
+    assert html_response(conn, 200) =~ ~r/Forbidden/
+  end
 end

@@ -1,7 +1,7 @@
 defmodule TaksoWeb.BookingController do
   use TaksoWeb, :controller
 
-  alias Takso.{Repo, Sales.Taxi, Sales.Booking, Sales.Allocation}
+  alias Takso.{Repo, Sales.Taxi, Sales.Booking, Sales.Allocation, Accounts.User}
   alias Ecto.{Changeset, Multi}
 
   import Ecto.Query, only: [from: 2]
