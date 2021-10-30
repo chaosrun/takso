@@ -56,6 +56,15 @@ Driver -> Not allowed to book a taxi, to complete other driver ride, or to view 
 
 ![](img/error05.png)
 
+## Test accounts
+
+- Customer:
+    - Email: `test@example.com`
+    - Password: `12345678`
+- Driver:
+    - Email: `fred@example.com`
+    - Password: `parool`
+
 ## About
 
 Team 27: Zhaosi Qu
