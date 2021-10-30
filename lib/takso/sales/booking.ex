@@ -17,9 +17,9 @@ defmodule Takso.Sales.Booking do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:pickup_address, :dropoff_address, :status])
+    |> validate_different_addresses
     |> validate_required([:pickup_address, :dropoff_address], message: "Address can not be empty!")
     |> validate_number(:distance, greater_than: 0)
-    |> validate_different_addresses
 
   end
 

@@ -10,10 +10,13 @@ defmodule TaksoWeb.BookingController do
     query = from t in Taxi,
             join: a in Allocation, on: t.id == a.taxi_id,
             group_by: t.username,
-            where: a.status == "accepted",
+            where: a.status == "ACCEPTED",
             select: {t.username, count(a.id)}
-    IO.inspect Repo.all(query) # Only for testing, remove after completing template summary.html
     render conn, "summary.html", tuples: Repo.all(query)
+  end
+
+  def complete(conn, _params) do
+    render conn, "complete.html"
   end
 
   def index(conn, _params) do
