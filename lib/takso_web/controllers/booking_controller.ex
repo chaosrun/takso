@@ -27,7 +27,15 @@ defmodule TaksoWeb.BookingController do
 
   def create(conn, booking_params) do
     user = conn.assigns.current_user
-    create(conn, booking_params, user)
+    user = User |> Repo.get(user.id) |> Repo.preload(:taxi)
+
+    if user.taxi do
+      conn
+      |> put_flash(:error, "Forbidden")
+      |> redirect(to: Routes.booking_path(conn, :index))
+    else
+      create(conn, booking_params, user)
+    end
   end
 
   def create(conn, booking_params, user) do
