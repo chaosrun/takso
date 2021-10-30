@@ -1,0 +1,9 @@
+<h2>Show booking</h2>
+
+<ul>
+
+
+
+</ul>
+
+<button class="btn btn-primary"><%= link "Back", to: Routes.booking_path(@conn, :index) %></button>

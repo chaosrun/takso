@@ -20,7 +20,10 @@ defmodule TaksoWeb.BookingController do
   end
 
   def index(conn, _params) do
-    bookings = Repo.all(from b in Booking, where: b.user_id == ^conn.assigns.current_user.id) |> Repo.preload(taxi: :user)
+    bookings = Repo.all(
+      from b in Booking,
+      where: b.user_id == ^conn.assigns.current_user.id
+    ) |> Repo.preload(taxi: :user)
     render conn, "index.html", bookings: bookings
   end
 
@@ -45,7 +48,13 @@ defmodule TaksoWeb.BookingController do
     pickup_address = booking_params["pickup_address"]
     dropoff_address = booking_params["dropoff_address"]
 
-    booking_struct = Ecto.build_assoc(user, :bookings, Enum.map(booking_params, fn({key, value}) -> {String.to_atom(key), value} end))
+    booking_struct = Ecto.build_assoc(
+      user, :bookings,
+      Enum.map(
+        booking_params,
+        fn({key, value}) -> {String.to_atom(key), value} end
+      )
+    )
     changeset = Booking.changeset(booking_struct, %{})
                 |> Changeset.put_change(:status, "OPEN")
     distance = get_distance(pickup_address, dropoff_address)
@@ -68,6 +77,7 @@ defmodule TaksoWeb.BookingController do
 
   def create_book(conn, booking, distance, available_taxis) do
     taxi = select_taxi(available_taxis, distance)
+    price = get_cost(distance, taxi)
 
     Multi.new
     |> Multi.insert(
@@ -85,6 +95,8 @@ defmodule TaksoWeb.BookingController do
       :booking,
       Booking.changeset(booking, %{})
       |> Changeset.put_change(:status, "ACCEPTED")
+      |> Changeset.put_change(:distance, distance)
+      |> Changeset.put_change(:price, price)
       |> Changeset.put_change(:taxi_id, taxi.id)
     )
     |> Repo.transaction
