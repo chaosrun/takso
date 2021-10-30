@@ -86,7 +86,9 @@ defmodule TaksoWeb.BookingController do
                     allocation = booking.allocation
                     Allocation.changeset(allocation, %{}) |> Changeset.put_change(:status, "COMPLETED") |> Repo.update!()
                     Taxi.changeset(taxi, %{}) |> Changeset.put_change(:status, "AVAILABLE") |> Repo.update!()
-                    conn |> redirect(to: Routes.booking_path(conn, :missions))
+                    conn
+                    |> put_flash(:info, "Completed the reide successfully")
+                    |> redirect(to: Routes.booking_path(conn, :missions))
     end
   end
 
