@@ -12,13 +12,19 @@
 
 alias Takso.{Repo, Accounts.User, Sales.Taxi}
 
-[%{name: "Fred Flintstone", username: "fred@example.com", password: "parool", age: 19},
- %{name: "Barney Rubble", username: "barney@example.com", password: "parool", age: 20},
+fred = %User{name: "Fred Flintstone", username: "fred@example.com", password: "parool", age: 19}
+fd = Repo.insert!(fred)
+IO.inspect fd
+
+[%{name: "Barney Rubble", username: "barney@example.com", password: "parool", age: 20},
  %{name: "Tester", username: "test@example.com", password: "12345678", age: 21}]
 |> Enum.map(fn user_data -> User.changeset(%User{}, user_data) end)
 |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
 
-[%{username: "fred@example.com", location: "Narva 25", status: "BUSY", user_id: 1, capacity: 4, price: 1.8},
- %{username: "barney@example.com", location: "Liivi 2", status: "BUSY", user_id: 2, capacity: 3, price: 1.2}]
+fred_taxi = %Taxi{username: "fred@example.com", location: "Narva 25", status: "AVAILABLE", user_id: fd.id, capacity: 4, price: 1.8}
+fd_taxi = Repo.insert!(fred_taxi)
+IO.inspect fd_taxi
+
+[%{username: "barney@example.com", location: "Liivi 2", status: "BUSY", user_id: 2, capacity: 3, price: 1.2}]
 |> Enum.map(fn taxi_data -> Taxi.changeset(%Taxi{}, taxi_data) end)
 |> Enum.each(fn changeset -> Repo.insert!(changeset) end)

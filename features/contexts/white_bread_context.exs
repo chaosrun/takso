@@ -2,7 +2,10 @@ defmodule WhiteBreadContext do
   use WhiteBread.Context
   use Hound.Helpers
 
-  alias Takso.Sales.Taxi
+  import Ecto.Query, only: [from: 2]
+
+  alias Ecto.{Changeset}
+  alias Takso.{Sales.Taxi, Repo}
 
   feature_starting_state fn  ->
     Application.ensure_all_started(:hound)
@@ -22,6 +25,11 @@ defmodule WhiteBreadContext do
   end
 
   given_ ~r/^the following taxis are on duty$/, fn state, %{table_data: table} ->
+    previous_taxis = Repo.all(from t in Taxi, where: t.status == "AVAILABLE", select: t)
+    previous_taxis
+    |> Enum.map(fn taxi -> Taxi.changeset(taxi, %{}) |> Changeset.put_change(:status, "BUSY") end)
+    |> Enum.each(fn changeset -> Takso.Repo.update!(changeset) end)
+
     table
     |> Enum.map(fn taxi -> Taxi.changeset(%Taxi{}, taxi) end)
     |> Enum.each(fn changeset -> Takso.Repo.insert!(changeset) end)

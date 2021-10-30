@@ -1,7 +1,10 @@
 defmodule TaksoWeb.BookingControllerTest do
   use TaksoWeb.ConnCase
 
-  alias Takso.{Sales.Taxi, Repo, Accounts.User}
+  import Ecto.Query, only: [from: 2]
+
+  alias Ecto.{Changeset}
+  alias Takso.{Accounts.User, Repo, Sales.Taxi, Sales.Booking}
 
   test "Login user", %{conn: conn} do
     conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
@@ -58,6 +61,12 @@ defmodule TaksoWeb.BookingControllerTest do
     conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
     conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Welcome Tester/
+
+    previous_taxis = Repo.all(from t in Taxi, where: t.status == "AVAILABLE", select: t)
+    previous_taxis
+    |> Enum.map(fn taxi -> Taxi.changeset(taxi, %{}) |> Changeset.put_change(:status, "BUSY") end)
+    |> Enum.each(fn changeset -> Takso.Repo.update!(changeset) end)
+
     Repo.insert!(%Taxi{status: "busy"})
     conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
     conn = get conn, redirected_to(conn)
@@ -80,6 +89,30 @@ defmodule TaksoWeb.BookingControllerTest do
 
     Repo.insert!(taxi_1)
     Repo.insert!(taxi_2)
+
+    conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
+    conn = get conn, redirected_to(conn)
+    assert html_response(conn, 200) =~ ~r/D2 Driver/
+  end
+
+  test "Booking selecte lowest rides number driver", %{conn: conn} do
+    conn = post conn, "sessions", %{session: [username: "test@example.com", password: "12345678"]}
+    conn = get conn, redirected_to(conn)
+    assert html_response(conn, 200) =~ ~r/Welcome Tester/
+
+    driver_1 = %User{name: "D1 Driver", username: "d1@example.com", password: "parool", age: 20}
+    driver_2 = %User{name: "D2 Driver", username: "d2@example.com", password: "parool", age: 20}
+
+    d1 = Repo.insert!(driver_1)
+    d2 = Repo.insert!(driver_2)
+
+    taxi_1 = %Taxi{username: "d1@example.com", location: "Narva 25", status: "AVAILABLE", user_id: d1.id, capacity: 4, price: 1.7}
+    taxi_2 = %Taxi{username: "d2@example.com", location: "Liivi 2", status: "AVAILABLE", user_id: d2.id, capacity: 3, price: 1.7}
+
+    Repo.insert!(taxi_1)
+    Repo.insert!(taxi_2)
+
+    Repo.insert!(%Booking{taxi_id: taxi_1.id})
 
     conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
     conn = get conn, redirected_to(conn)

@@ -65,6 +65,7 @@ defmodule TaksoWeb.BookingController do
 
   def create_book(conn, booking, distance, available_taxis) do
     taxi =  Enum.min_by(available_taxis, fn tt -> get_cost(distance, tt) end)
+
     Multi.new
     |> Multi.insert(
       :allocation,
@@ -120,6 +121,13 @@ defmodule TaksoWeb.BookingController do
 
   defp get_cost(distance, taxi) do
     distance * taxi.price
+  end
+
+  defp get_rides(taxi) do
+    case taxi.bookings do
+      nil      -> 0
+      bookings -> length(bookings)
+    end
   end
 
 end
