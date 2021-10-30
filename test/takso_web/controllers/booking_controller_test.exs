@@ -131,6 +131,8 @@ defmodule TaksoWeb.BookingControllerTest do
 
     conn = post conn, "bookings", %{pickup_address: "Liivi 2", dropoff_address: "Muuseumi tee 2"}
     conn = get conn, redirected_to(conn)
+    assert redirected_to(conn, 302)
+    conn = get conn, redirected_to(conn)
     assert html_response(conn, 200) =~ ~r/Forbidden/
   end
 end

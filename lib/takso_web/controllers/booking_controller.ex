@@ -172,7 +172,6 @@ defmodule TaksoWeb.BookingController do
 
   def create_book(conn, booking, distance, available_taxis) do
     taxi = select_taxi(available_taxis, distance)
-    IO.inspect taxi
     price = get_cost(distance, taxi)
 
     Multi.new
