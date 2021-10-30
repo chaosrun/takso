@@ -27,6 +27,10 @@ defmodule TaksoWeb.BookingController do
 
   def create(conn, booking_params) do
     user = conn.assigns.current_user
+    create(conn, booking_params, user)
+  end
+
+  def create(conn, booking_params, user) do
     pickup_address = booking_params["pickup_address"]
     dropoff_address = booking_params["dropoff_address"]
 
@@ -36,58 +40,69 @@ defmodule TaksoWeb.BookingController do
     distance = get_distance(pickup_address, dropoff_address)
 
     case Repo.insert(changeset) do
-      {:ok, booking} ->
-        query = from t in Taxi, where: t.status == "AVAILABLE", select: t
-        available_taxis = Repo.all(query)
-
-        case length(available_taxis) > 0 do
-          true ->
-            taxi =  Enum.min_by(available_taxis, fn tt -> get_cost(distance, tt) end)
-            Multi.new
-            |> Multi.insert(
-              :allocation,
-              Allocation.changeset(%Allocation{}, %{status: "ALLOCATED"})
-              |> Changeset.put_change(:booking_id, booking.id)
-              |> Changeset.put_change(:taxi_id, taxi.id)
-            )
-            |> Multi.update(
-              :taxi,
-              Taxi.changeset(taxi, %{})
-              |> Changeset.put_change(:status, "BUSY")
-            )
-            |> Multi.update(
-              :booking,
-              Booking.changeset(booking, %{})
-              |> Changeset.put_change(:status, "ACCEPTED")
-              |> Changeset.put_change(:taxi_id, taxi.id)
-            )
-            |> Repo.transaction
-
-            conn
-            |> put_flash(:info, "Your taxi will arrive in 5 minutes")
-            |> redirect(to: Routes.booking_path(conn, :index))
-
-          _    ->
-            Booking.changeset(booking) |> Changeset.put_change(:status, "REJECTED")
-            |> Repo.update
-
-            conn
-            |> put_flash(:info, "At present, there is no taxi available!")
-            |> redirect(to: Routes.booking_path(conn, :index))
-        end
-      {:error, changeset} ->
-        error_msg = changeset.errors
-          |> hd()
-          |> Tuple.to_list()
-          |> tl()
-          |> hd()
-          |> Tuple.to_list()
-          |> hd()
-
-        conn
-        |> put_flash(:error, error_msg)
-        |> redirect(to: Routes.booking_path(conn, :new))
+      {:ok, booking}      -> create_book(conn, booking, distance)
+      {:error, changeset} -> create_error(conn, changeset)
     end
+  end
+
+  def create_book(conn, booking, distance) do
+    query = from t in Taxi, where: t.status == "AVAILABLE", select: t
+    available_taxis = Repo.all(query)
+
+    case length(available_taxis) > 0 do
+      true -> create_book(conn, booking, distance, available_taxis)
+      _    -> create_book(conn, booking)
+    end
+  end
+
+  def create_book(conn, booking, distance, available_taxis) do
+    taxi =  Enum.min_by(available_taxis, fn tt -> get_cost(distance, tt) end)
+    Multi.new
+    |> Multi.insert(
+      :allocation,
+      Allocation.changeset(%Allocation{}, %{status: "ALLOCATED"})
+      |> Changeset.put_change(:booking_id, booking.id)
+      |> Changeset.put_change(:taxi_id, taxi.id)
+    )
+    |> Multi.update(
+      :taxi,
+      Taxi.changeset(taxi, %{})
+      |> Changeset.put_change(:status, "BUSY")
+    )
+    |> Multi.update(
+      :booking,
+      Booking.changeset(booking, %{})
+      |> Changeset.put_change(:status, "ACCEPTED")
+      |> Changeset.put_change(:taxi_id, taxi.id)
+    )
+    |> Repo.transaction
+
+    conn
+    |> put_flash(:info, "Your taxi will arrive in 5 minutes")
+    |> redirect(to: Routes.booking_path(conn, :index))
+  end
+
+  def create_book(conn, booking) do
+    Booking.changeset(booking) |> Changeset.put_change(:status, "REJECTED")
+    |> Repo.update
+
+    conn
+    |> put_flash(:info, "At present, there is no taxi available!")
+    |> redirect(to: Routes.booking_path(conn, :index))
+  end
+
+  def create_error(conn, changeset) do
+    error_msg = changeset.errors
+    |> hd()
+    |> Tuple.to_list()
+    |> tl()
+    |> hd()
+    |> Tuple.to_list()
+    |> hd()
+
+    conn
+    |> put_flash(:error, error_msg)
+    |> redirect(to: Routes.booking_path(conn, :new))
   end
 
   defp get_distance(pickup_address, dropoff_address) do
