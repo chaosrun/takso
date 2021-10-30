@@ -15,6 +15,19 @@ defmodule TaksoWeb.BookingController do
     render conn, "summary.html", tuples: Repo.all(query)
   end
 
+  def show(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+    booking = Repo.get(Booking, id) |> Repo.preload([:user, taxi: :user])
+
+    case booking && (user.id == booking.user.id) do
+      true -> render(conn, "show.html", booking: booking)
+      _    -> conn
+              |> put_flash(:error, "Forbidden")
+              |> redirect(to: Routes.booking_path(conn, :index))
+    end
+
+ end
+
   def complete(conn, _params) do
     render conn, "complete.html"
   end
@@ -135,7 +148,7 @@ defmodule TaksoWeb.BookingController do
   end
 
   defp get_cost(distance, taxi) do
-    distance * taxi.price
+    Float.round(distance * taxi.price, 2)
   end
 
   defp get_rides(taxi) do

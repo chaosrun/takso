@@ -2,7 +2,47 @@
 
 <ul>
 
+  <li>
+    <strong>Pickup Address:</strong>
+    <%= @booking.pickup_address %>
+  </li>
 
+  <li>
+    <strong>Dropoff Address:</strong>
+    <%= @booking.dropoff_address %>
+  </li>
+
+  <li>
+    <strong>Status:</strong>
+    <%= @booking.status %>
+  </li>
+
+  <%= if @booking.status == "ACCEPTED" do %>
+    <li>
+        <strong>Capacity:</strong>
+        <%= @booking.taxi.capacity %>
+    </li>
+
+    <li>
+        <strong>Distance:</strong>
+        <%= @booking.distance %> km
+    </li>
+
+    <li>
+        <strong>Price:</strong>
+        <%= @booking.price %>
+    </li>
+
+    <li>
+        <strong>Taxi Location:</strong>
+        <%= @booking.taxi.location %>
+    </li>
+
+    <li>
+        <strong>Driver Name:</strong>
+        <%= @booking.taxi.user.name %>
+    </li>
+  <% end %>
 
 </ul>
 
