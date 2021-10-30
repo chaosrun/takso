@@ -17,7 +17,13 @@ defmodule TaksoWeb.BookingController do
 
   def show(conn, %{"id" => id}) do
     user = conn.assigns.current_user
-    booking = Repo.get(Booking, id) |> Repo.preload([:user, taxi: :user])
+
+    case user do
+      nil -> index(conn)
+      _   -> show(conn, %{"id" => id}, user)
+    end
+
+    booking = Repo.get(Booking, id) |> Repo.preload([:allocation, :user, taxi: :user])
 
     case booking && (user.id == booking.user.id) do
       true -> render(conn, "show.html", booking: booking)
@@ -25,20 +31,93 @@ defmodule TaksoWeb.BookingController do
               |> put_flash(:error, "Forbidden")
               |> redirect(to: Routes.booking_path(conn, :index))
     end
-
- end
-
-  def complete(conn, _params) do
-    render conn, "complete.html"
   end
 
-  def index(conn, _params) do
-    bookings = Repo.all(
-      from b in Booking,
-      where: b.user_id == ^conn.assigns.current_user.id
-    ) |> Repo.preload(taxi: :user)
-    render conn, "index.html", bookings: bookings
+  def show(conn, %{"id" => id}, user) do
+    booking = Repo.get(Booking, id) |> Repo.preload([:allocation, :user, taxi: :user])
+
+    case booking && (user.id == booking.user.id) do
+      true -> render(conn, "show.html", booking: booking)
+      _    -> conn
+              |> put_flash(:error, "Forbidden")
+              |> redirect(to: Routes.booking_path(conn, :index))
+    end
   end
+
+  def missions(conn, _params) do
+    case conn.assigns.current_user do
+      nil -> index(conn)
+      _   -> missions(conn)
+    end
+  end
+
+  def missions(conn) do
+    user = conn.assigns.current_user
+    user = User |> Repo.get(user.id) |> Repo.preload(:taxi)
+
+    case Map.fetch(user, :taxi) do
+      {:ok, nil} -> conn
+                    |> put_flash(:error, "Forbidden")
+                    |> redirect(to: Routes.booking_path(conn, :index))
+      _          -> bookings =
+                      Repo.all(Booking)
+                      |> Enum.filter(fn b -> b.taxi_id == user.taxi.id end)
+                      |> Repo.preload(:allocation)
+                    render conn, "missions.html", bookings: bookings
+    end
+  end
+
+  def complete(conn, %{"id" => id}) do
+    user = conn.assigns.current_user
+
+    case user do
+      nil -> index(conn)
+      _   -> complete(conn, %{"id" => id} ,user)
+    end
+  end
+
+  def complete(conn, %{"id" => id} ,user) do
+    case Map.fetch(user, :taxi) do
+      {:ok, nil} -> conn
+                    |> put_flash(:error, "Forbidden")
+                    |> redirect(to: Routes.booking_path(conn, :index))
+      _          -> booking = Repo.get(Booking, id) |> Repo.preload([:allocation, :user, :taxi])
+                    taxi = booking.taxi
+                    allocation = booking.allocation
+                    Allocation.changeset(allocation, %{}) |> Changeset.put_change(:status, "COMPLETED") |> Repo.update!()
+                    Taxi.changeset(taxi, %{}) |> Changeset.put_change(:status, "AVAILABLE") |> Repo.update!()
+                    conn |> redirect(to: Routes.booking_path(conn, :missions))
+    end
+  end
+
+  def index(conn, params) do
+    user = conn.assigns.current_user
+
+    case user do
+      nil -> index(conn)
+      _   -> index(conn, params, user)
+    end
+  end
+
+  def index(conn) do
+    conn
+    |> put_flash(:info, "Please login first")
+    |> redirect(to: Routes.session_path(conn, :new))
+  end
+
+  def index(conn, _params, user) do
+    user = User |> Repo.get(user.id) |> Repo.preload(:taxi)
+
+    case Map.fetch(user, :taxi) do
+      {:ok, nil} -> bookings = Repo.all(
+                      from b in Booking,
+                      where: b.user_id == ^conn.assigns.current_user.id
+                    ) |> Repo.preload(taxi: :user)
+      render conn, "index.html", bookings: bookings
+      _          -> conn |> redirect(to: Routes.booking_path(conn, :missions))
+    end
+  end
+
 
   def new(conn, _params) do
     render conn, "new.html"
@@ -46,14 +125,17 @@ defmodule TaksoWeb.BookingController do
 
   def create(conn, booking_params) do
     user = conn.assigns.current_user
-    user = User |> Repo.get(user.id) |> Repo.preload(:taxi)
 
-    if user.taxi do
-      conn
-      |> put_flash(:error, "Forbidden")
-      |> redirect(to: Routes.booking_path(conn, :index))
-    else
-      create(conn, booking_params, user)
+    case user do
+      nil ->  index(conn)
+      _   ->  user = User |> Repo.get(user.id) |> Repo.preload(:taxi)
+              if user.taxi do
+                conn
+                |> put_flash(:error, "Forbidden")
+                |> redirect(to: Routes.booking_path(conn, :index))
+              else
+                create(conn, booking_params, user)
+              end
     end
   end
 
@@ -90,6 +172,7 @@ defmodule TaksoWeb.BookingController do
 
   def create_book(conn, booking, distance, available_taxis) do
     taxi = select_taxi(available_taxis, distance)
+    IO.inspect taxi
     price = get_cost(distance, taxi)
 
     Multi.new

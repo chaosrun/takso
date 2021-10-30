@@ -21,7 +21,7 @@ fd = Repo.insert!(fred)
 |> Enum.each(fn changeset -> Repo.insert!(changeset) end)
 
 fred_taxi = %Taxi{username: "fred@example.com", location: "Narva 25", status: "AVAILABLE", user_id: fd.id, capacity: 4, price: 1.8}
-fd_taxi = Repo.insert!(fred_taxi)
+Repo.insert!(fred_taxi)
 
 [%{username: "barney@example.com", location: "Liivi 2", status: "BUSY", user_id: 2, capacity: 3, price: 1.2}]
 |> Enum.map(fn taxi_data -> Taxi.changeset(%Taxi{}, taxi_data) end)

@@ -1,4 +1,4 @@
-<h2>Listing bookings</h2>
+<h2>Listing Bookings</h2>
 
 <button class="btn btn-primary"><%= link "New Booking", to: Routes.booking_path(@conn, :new) %></button>
 

@@ -8,6 +8,7 @@ defmodule Takso.Sales.Booking do
     field :status,          :string, default: "OPEN"
     field :distance,        :float
     field :price,           :float
+    has_one :allocation, Takso.Sales.Allocation
     belongs_to :user, Takso.Accounts.User
     belongs_to :taxi, Takso.Sales.Taxi
 
@@ -21,7 +22,6 @@ defmodule Takso.Sales.Booking do
     |> validate_different_addresses
     |> validate_required([:pickup_address, :dropoff_address], message: "Address can not be empty!")
     |> validate_number(:distance, greater_than: 0)
-
   end
 
   defp validate_different_addresses(changeset) do

@@ -1,0 +1,31 @@
+<h2>Listing Missions</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Pickup address</th>
+      <th>Drop off address</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for booking <- Enum.reverse(@bookings) do %>
+    <tr>
+      <td><%= booking.pickup_address %></td>
+      <td><%= booking.dropoff_address %></td>
+      <td><%= booking.allocation.status %></td>
+
+      <%= if booking.allocation.status == "ALLOCATED" do %>
+        <td class="text-right">
+            <span><%= link "Complete", to: Routes.booking_path(@conn, :complete, booking), method: :patch, data: [confirm: "Are you sure?"], class: "btn btn-default btn-xs" %></span>
+        </td>
+      <% else %>
+        <td class="text-right">
+            <span><a>--</a></span>
+        </td>
+      <% end %>
+    </tr>
+<% end %>
+  </tbody>
+</table>

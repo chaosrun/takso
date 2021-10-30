@@ -8,8 +8,9 @@ defmodule Takso.Sales.Taxi do
     field :status,   :string
     field :capacity, :integer
     field :price,    :float
-    belongs_to :user, Takso.Accounts.User
     has_many :bookings, Takso.Sales.Booking
+    has_one  :allocation, Takso.Sales.Allocation
+    belongs_to :user, Takso.Accounts.User
 
     timestamps()
   end
@@ -18,7 +19,7 @@ defmodule Takso.Sales.Taxi do
   def changeset(taxi, attrs) do
     taxi
     |> cast(attrs, [:username, :location, :status, :capacity, :price])
-    |> validate_format(:username, ~r/@/)
+    |> validate_format(:username, ~r/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/)
     |> validate_number(:capacity, greater_than: 0)
     |> validate_number(:price, greater_than: 0)
   end

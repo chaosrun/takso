@@ -13,7 +13,7 @@
   </li>
 
   <li>
-    <strong>Status:</strong>
+    <strong>Booking Status:</strong>
     <%= @booking.status %>
   </li>
 
@@ -41,6 +41,11 @@
     <li>
         <strong>Driver Name:</strong>
         <%= @booking.taxi.user.name %>
+    </li>
+
+    <li>
+        <strong>Ride Status:</strong>
+        <%= @booking.allocation.status %>
     </li>
   <% end %>
 
