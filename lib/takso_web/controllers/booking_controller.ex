@@ -64,7 +64,7 @@ defmodule TaksoWeb.BookingController do
   end
 
   def create_book(conn, booking, distance, available_taxis) do
-    taxi =  Enum.min_by(available_taxis, fn tt -> get_cost(distance, tt) end)
+    taxi = select_taxi(available_taxis, distance)
 
     Multi.new
     |> Multi.insert(
@@ -124,10 +124,34 @@ defmodule TaksoWeb.BookingController do
   end
 
   defp get_rides(taxi) do
+    taxi = Taxi |> Repo.get(taxi.id) |> Repo.preload(:bookings)
+
     case taxi.bookings do
-      nil      -> 0
-      bookings -> length(bookings)
+      nil       -> 0
+      bookings  -> length(bookings)
     end
+  end
+
+  defp select_taxi(taxis, distance) do
+    the_map = Enum.reduce taxis, %{}, fn taxi, acc ->
+      Map.put(acc, taxi, get_cost(distance, taxi))
+    end
+
+    cost = the_map
+           |> Enum.min_by(fn {_k, v} -> v end)
+           |> elem(1)
+
+    taxis_min = Map.keys(the_map) |> Enum.filter(fn k -> Map.get(the_map, k) == cost end)
+
+    case length(taxis_min) > 1 do
+      true -> select_taxi(taxis_min)
+      _    -> List.first(taxis_min)
+    end
+  end
+
+  defp select_taxi(taxis) do
+    taxi = Enum.min_by(taxis, fn t -> get_rides(t) end)
+    taxi
   end
 
 end
