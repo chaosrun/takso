@@ -19,7 +19,7 @@ defmodule Takso.Accounts.User do
     |> cast(params, [:name, :username, :password, :age])
     |> validate_required([:name, :username, :password, :age])
     |> unique_constraint(:username)
-    |> validate_format(:username, ~r/@/)
+    |> validate_format(:username, ~r/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/)
     |> validate_number(:age, greater_than_or_equal_to: 18)
   end
 end
